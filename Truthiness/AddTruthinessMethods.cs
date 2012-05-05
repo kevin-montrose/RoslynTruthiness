@@ -22,7 +22,7 @@ namespace Truthiness
 
             if (type.IsValueType)
             {
-                return o != Activator.CreateInstance(type);
+                return !o.Equals(Activator.CreateInstance(type));
             }
 
             return true;
