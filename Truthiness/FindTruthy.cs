@@ -54,7 +54,6 @@ namespace Truthiness
 
         protected override void VisitConditionalExpression(ConditionalExpressionSyntax node)
         {
-            Consider(node);
             Consider(node.Condition);
 
             base.VisitConditionalExpression(node);

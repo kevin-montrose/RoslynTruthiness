@@ -4,6 +4,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Truthiness", "Truthiness\Truthiness.csproj", "{19B16D86-663F-4068-8D66-C9858A878C46}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E96CA014-EEC3-4E8C-B7C4-257C25C1505C}"
+	ProjectSection(SolutionItems) = preProject
+		License.txt = License.txt
+		README = README
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
