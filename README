@@ -1,1 +1,13 @@
 A Bad Idea: Adding Truthiness to C#
+
+Don't use this for anything real, really.
+
+Depends on Roslyn CTP, you must have it installed to compile and run.
+
+Allows you to use "Truthy" values in conditional statements in C#.
+
+A value is considered false if it is null, the default value of a ValueType, or the empty string.  It is considered true otherwise.
+
+Conditional statements are considered if, while, do, for, and the ternary conditonal.
+
+Again, don't use this for anything aside from play.  It's neat, but dangerous.
