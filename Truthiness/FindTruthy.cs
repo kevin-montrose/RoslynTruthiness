@@ -8,8 +8,42 @@ namespace Truthiness
 {
     class FindTruthy : SyntaxWalker
     {
-        private List<ExpressionSyntax> _AreTruthy = new List<ExpressionSyntax>();
-        public IEnumerable<ExpressionSyntax> AreTruthy { get { return _AreTruthy; } }
+        private HashSet<ExpressionSyntax> _AreTruthy = new HashSet<ExpressionSyntax>();
+        public IEnumerable<ExpressionSyntax> AreTruthy { 
+            get 
+            {
+                var noNest = new List<ExpressionSyntax>();
+
+                foreach (var truthy in _AreTruthy)
+                {
+                    var descendents = truthy.DescendentNodesAndTokens().ToList();
+
+                    if (_AreTruthy.Any(a => descendents.Contains(a))) continue;
+
+                    noNest.Add(truthy);
+                }
+
+                var alreadyWrapped = noNest.Where(
+                    delegate(ExpressionSyntax w)
+                    {
+                        var arg = w.Parent as ArgumentSyntax;
+                        if(arg == null) return false;
+
+                        var argList = arg.Parent as ArgumentListSyntax;
+                        if (argList == null) return false;
+
+                        var parent = argList.Parent as InvocationExpressionSyntax;
+                        if(parent == null) return false;
+
+                        return IsTruthyInvokation(parent);
+                    }
+                ).ToList();
+
+                alreadyWrapped.ForEach(x => noNest.Remove(x));
+
+                return noNest;
+            } 
+        }
 
         private SemanticModel Model;
 
@@ -20,6 +54,7 @@ namespace Truthiness
 
         protected override void VisitConditionalExpression(ConditionalExpressionSyntax node)
         {
+            Consider(node);
             Consider(node.Condition);
 
             base.VisitConditionalExpression(node);
@@ -71,8 +106,30 @@ namespace Truthiness
             _AreTruthy.Add(exp);
         }
 
+        private bool IsTruthyInvokation(InvocationExpressionSyntax invoke)
+        {
+            var asId = invoke.Expression as IdentifierNameSyntax;
+            return asId != null && asId.PlainName == "__Truthy";
+        }
+
         private bool Consider(ExpressionSyntax exp)
         {
+            var cond = exp as ConditionalExpressionSyntax;
+            if (cond != null)
+            {
+                if (!IsBool(cond.Condition))
+                {
+                    Consider(cond.Condition);
+                }
+
+                if (!IsBool(cond))
+                {
+                    Add(cond);
+                }
+
+                return true;
+            }
+
             var paren = exp as ParenthesizedExpressionSyntax;
             if (paren != null)
             {
@@ -160,6 +217,20 @@ namespace Truthiness
                         {
                             Add(unary.Operand);
                         }
+                    }
+                }
+
+                return true;
+            }
+
+            var invoke = exp as InvocationExpressionSyntax;
+            if (invoke != null)
+            {
+                if (!IsTruthyInvokation(invoke))
+                {
+                    if (!IsBool(invoke.Expression))
+                    {
+                        Add(invoke);
                     }
                 }
 

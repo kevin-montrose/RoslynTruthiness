@@ -35,10 +35,12 @@ namespace Truthiness
 
         protected override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            bool callsTruthiness =
+            var callsTruthiness =
                 node.DescendentNodes().OfType<InvocationExpressionSyntax>()
                 .Select(i => i.Expression).OfType<IdentifierNameSyntax>()
                 .Any(a => a.PlainName == "__Truthy");
+
+            var allMethods = node.DescendentNodes().OfType<MethodDeclarationSyntax>().ToList();
 
             if (callsTruthiness)
             {
